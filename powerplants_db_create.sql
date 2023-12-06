@@ -42,5 +42,5 @@ CREATE TABLE IF NOT EXISTS TEMPORAL (
     "cf" float,
     "time_coverage" float,
     "co2emitted" float,
-    PRIMARY KEY ("eic_p", "eic_g")
+    PRIMARY KEY ("eic_p", "eic_g", "cyear")
 );
