@@ -69,7 +69,7 @@ d3.json("europe.geojson").then(function (geojson) {
         tooltip.transition()
           .duration(200)
           .style("opacity", .9);
-        tooltip.html("Value: " + d['2018'])
+        tooltip.html(d['Name'] + "</br>" + "CO2 Emitted: " + d['2018'] + " Kg")
           .style("left", (d3.event.pageX + 10) + "px")
           .style("top", (d3.event.pageY - 20) + "px");
       })
