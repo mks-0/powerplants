@@ -1,6 +1,6 @@
 async function loadData() {
   try {
-    const [geojson, csvData, powerplantsData] = await Promise.all([
+    const [geojson, countryData, powerplantsData] = await Promise.all([
       d3.json("Data/europe.geojson"),
       d3.csv("Data/jrc_countries.csv"),
       d3.csv("Data/jrc_powerplants.csv")
@@ -13,7 +13,7 @@ async function loadData() {
     });
 
     // Process country emissions data
-    const emissionDataMap = new Map(csvData.map(d => [d['Country'], +d['Emissions']]));
+    const emissionDataMap = new Map(countryData.map(d => [d['Country'], +d['Emissions']]));
 
     geojson.features.forEach(feature => {
       const countryName = feature.properties.NAME;
@@ -34,7 +34,9 @@ async function loadData() {
     const mapGroup = svg.append("g");
 
     // Color scale for map
-    const mapColorScale = d3.scaleSequential(d3.interpolateRgbBasis(["#32ba56", "#e3eb0c", "#edbf05", "#f58905", "#f73a00"]))
+    const mapColorScale = d3.scaleSequential(d3.interpolateRgbBasis([
+      "#f5e267", "#f77d31", "#c72a12"
+    ]))
       .domain(d3.extent(geojson.features, d => d.properties.Emissions));
 
     // Join the FeatureCollection's features array to path elements
@@ -43,7 +45,7 @@ async function loadData() {
       .enter()
       .append('path')
       .attr('d', geoGenerator)
-      .style('fill', d => (d.properties.Emissions === 0) ? 'grey' : mapColorScale(d.properties.Emissions))
+      .style('fill', d => (d.properties.Emissions === 0) ? '#ababab' : mapColorScale(d.properties.Emissions))
       .style('stroke', 'white');
 
     // Continuous Color Scale Legend
@@ -133,7 +135,7 @@ async function loadData() {
       .attr("r", d => sizeScale(d['co2emitted']))
       .style("fill", d => {
         const rgbColor = d3.color(typeColorScale(d['type_g'])).rgb();
-        return `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)`;
+        return `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.9)`;
       })
       .style("stroke", "blue")
       .style("stroke-width", 1)
@@ -141,9 +143,9 @@ async function loadData() {
         tooltip.transition()
           .duration(200)
           .style("opacity", .9);
-        tooltip.html(`${d['country']}<br>${d['name_p']}<br>`
-        +`CO2 Emitted:${d3.format(",.0f")(d['co2emitted'] / 1000)} t`
-        +`<br>Generation: ${d3.format(",.0f")(d['generation'] / 1000)} GWh`)
+        tooltip.html(`${d['country']}<br>Name: ${d['name_p']}<br>`
+          + `CO2 Emitted: ${d3.format(",.0f")(d['co2emitted'] / 1000)} t`
+          + `<br>Generation: ${d3.format(",.0f")(d['generation'] / 1000)} GWh`)
           .style("left", (d3.event.pageX + 10) + "px")
           .style("top", (d3.event.pageY - 20) + "px");
       })
@@ -152,6 +154,12 @@ async function loadData() {
           .duration(500)
           .style("opacity", 0);
       });
+
+    const initialZoom = {
+      k: 1.7,  // Initial scale (adjust as needed)
+      x: -500,  // Initial x translation
+      y: -700   // Initial y translation
+    };
 
     let zoom = d3.zoom()
       .scaleExtent([1, 20])
@@ -166,6 +174,12 @@ async function loadData() {
           });
       });
 
+    // Apply the initial zoom settings
+    svg.call(zoom.transform, d3.zoomIdentity
+      .translate(initialZoom.x, initialZoom.y)
+      .scale(initialZoom.k)
+    );
+    
     svg.call(zoom);
 
   } catch (error) {
