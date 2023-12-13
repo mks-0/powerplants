@@ -2,7 +2,7 @@ async function loadData() {
   try {
     const [geojson, countryData, powerplantsData] = await Promise.all([
       d3.json("Data/europe.geojson"),
-      d3.csv("Data/jrc_countries.csv"),
+      d3.csv("Data/ember_countries.csv"),
       d3.csv("Data/jrc_powerplants.csv")
     ]);
 
@@ -11,6 +11,8 @@ async function loadData() {
       d.lon = +d.lon;
       d['co2emitted'] = +d['co2emitted'];
     });
+
+    let currentDataProperty = 'Emissions';
 
     // Process country emissions data
     const emissionDataMap = new Map(countryData.map(d => [d['Country'], +d['Emissions']]));
@@ -49,13 +51,13 @@ async function loadData() {
       .style('stroke', 'white');
 
     // Continuous Color Scale Legend
-    const legendGroup = svg.append("g")
+    const legendGroup = d3.select('#map').append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(${svgWidth * 0.02}, ${svgHeight * 0.05})`);
+      .attr("id", "em-legend")
 
     const legendGradient = legendGroup.append('defs')
       .append('linearGradient')
-      .attr('id', 'legend-gradient')
+      .attr('id', 'em-legend-gradient')
       .attr('x1', '0%')
       .attr('y1', '0%')
       .attr('x2', '100%')
@@ -64,33 +66,65 @@ async function loadData() {
     legendGradient.selectAll('stop')
       .data(mapColorScale.ticks(20))
       .enter().append('stop')
-      .attr('offset', (d, i) => i / (mapColorScale.ticks(20).length - 1))
+      .attr('offset', (d, i) => i / (mapColorScale.ticks(20).length))
       .attr('stop-color', d => mapColorScale(d));
 
     legendGroup.append('rect')
-      .attr('width', 200)
-      .attr('height', 20)
-      .style('fill', 'url(#legend-gradient)')
-      .attr("transform", `translate(${svgWidth * -0.2}, ${svgHeight * 0})`);
+      .attr('width', 210)
+      .attr('height', 25)
+      .style('fill', 'url(#em-legend-gradient)')
 
     const legendLabels = [mapColorScale.domain()[0], (mapColorScale.domain()[1] / 1e6)];
 
-    legendGroup.selectAll('.legend-text')
+    legendGroup.selectAll('.em-legend-text')
       .data(legendLabels)
       .enter().append('text')
-      .attr('class', 'legend-text')
-      .attr('x', (d, i) => (i == 0) ? svgWidth * -0.2 : svgWidth * -0.06)
-      .attr('y', 40)
-      .attr('dy', '0.35em')
+      .attr('id', 'em-legend-text')
+      .attr('x', (d, i) => (i == 0) ? 0 : 150)
+ 
       .text(d => d3.format(".0f")(d) + " Mt");
 
     legendGroup.append('text')
-      .attr('class', 'legend-title')
-      .attr('x', svgWidth * -0.11)
-      .attr('y', svgHeight * -0.01)
-      .attr('dy', '0.35em')
-      .style('text-anchor', 'middle')
-      .text('CO2 Emitted per year');
+      .attr('id', 'em-legend-title')
+      .text('CO2 Emissions sum');
+
+    function switchEmissions() {
+      let dataPropertyMap = new Map(countryData.map(d => [d['Country'], +d[currentDataProperty]]));
+
+      geojson.features.forEach(feature => {
+        let countryName = feature.properties.NAME;
+        feature.properties[currentDataProperty] = dataPropertyMap.has(countryName) ? dataPropertyMap.get(countryName) : 0;
+      });
+
+      // Update color scale domain
+      mapColorScale.domain(d3.extent(geojson.features, d => d.properties[currentDataProperty]));
+
+      // Update map fill
+      mapGroup.selectAll('path')
+        .style('fill', d => (d.properties[currentDataProperty] === 0) ? '#ababab' : mapColorScale(d.properties[currentDataProperty]));
+
+      // Dynamically generate legend title and labels
+      let isEmissions = currentDataProperty === 'Emissions';
+      let titleText = isEmissions ? 'CO2 Emissions sum' : 'CO2 Emissions per capita';
+      let legendLabels = isEmissions ? [mapColorScale.domain()[0], mapColorScale.domain()[1] / 1e6] : [mapColorScale.domain()[0], mapColorScale.domain()[1] * 1000];
+
+      // Update legend title and labels
+      legendGroup.select('#em-legend-title')
+        .text(titleText)
+
+      legendGroup.selectAll('#em-legend-text')
+        .data(legendLabels)
+        .text(d => d3.format(isEmissions ? ".0f" : ",.0f")(d) + (isEmissions ? " Mt" : " Kg"));
+    }
+
+    // Add an event listener or UI element to trigger the switch
+    d3.select('#switchButton') // Change this selector based on your UI element
+      .on('click', function () {
+        // Toggle between 'Emissions' and 'em_per_capita'
+        currentDataProperty = (currentDataProperty === 'Emissions') ? 'em_per_capita' : 'Emissions';
+        // Update map and legend with the new data property
+        switchEmissions();
+      });
 
     // Powerplants data processing
     const sizeScale = d3.scaleLinear()
@@ -101,14 +135,14 @@ async function loadData() {
       .domain(powerplantsData.map(d => d['type_g']));
 
     // Add a group element for the type_g legend
-    const typeLegendGroup = svg.append("g")
+    const typeLegendGroup = d3.select('#map').append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(${svgWidth * 1}, ${svgHeight * 0.05})`);
+      .attr("id", "type-legend")
 
     typeLegendGroup.selectAll('.legend-circle')
       .data(typeColorScale.domain())
       .enter().append('circle')
-      .attr('class', 'legend-circle')
+      .attr('id', 'type-legend-circle')
       .attr('cx', 10)
       .attr('cy', (d, i) => i * 30 + 10)
       .attr('r', 10)
@@ -117,11 +151,9 @@ async function loadData() {
     typeLegendGroup.selectAll('.legend-text')
       .data(typeColorScale.domain())
       .enter().append('text')
-      .attr('class', 'legend-text')
+      .attr('id', 'type-legend-text')
       .attr('y', (d, i) => i * 30 + 15)
       .attr('x', 25)
-      .attr('dx', '0.35em')
-      .style('text-anchor', 'left')
       .text(d => d);
 
     const markerGroup = svg.append("g");
@@ -179,7 +211,7 @@ async function loadData() {
       .translate(initialZoom.x, initialZoom.y)
       .scale(initialZoom.k)
     );
-    
+
     svg.call(zoom);
 
   } catch (error) {

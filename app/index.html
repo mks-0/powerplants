@@ -6,16 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>European Power Plants CO2 Emissions</title>
   <script src="https://d3js.org/d3.v5.min.js"></script>
+  <link rel="icon" href="bolt-solid.svg" type="image/x-icon">
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
   <h1>European Power Plants CO2 Emissions</h1>
   <div id="container">
+    <button id="switchButton">Switch</button>
     <svg id="map"></svg>
     <script src="script.js"> </script>
   </div>
-  <div class="flex-container">
+  <div class="footer">
     <div>Sources: </div>
     <div id="links">
       <a href="https://data.jrc.ec.europa.eu/dataset/9810feeb-f062-49cd-8e76-8d8cfd488a05">
@@ -25,6 +27,7 @@
       <a href="https://ember-climate.org/data-catalogue/eu-power-plant-emissions-data/">EMBER EU Power Plant Emissions
         Data</a>
     </div>
+    <div id="info">The provided data covers 2018 EU CO2 Emissions</div>
   </div>
 </body>
 
