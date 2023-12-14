@@ -171,7 +171,7 @@ async function loadData() {
 
     const sizeScale = d3.scaleLinear()
       .domain(d3.extent(powerplantsData, d => d['co2emitted']))
-      .range([4, 20]);
+      .range([2, 20]);
 
     // Tooltip setup
     const tooltip = d3.select("body").append("div")
@@ -188,7 +188,7 @@ async function loadData() {
       .attr("r", d => sizeScale(d['co2emitted']))
       .style("fill", d => {
         const rgbColor = d3.color(typeColorScale(d['type_g'])).rgb();
-        return `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.9)`;
+        return `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)`;
       })
       .style("stroke", "blue")
       .style("stroke-width", 1)
@@ -224,10 +224,11 @@ async function loadData() {
         mapGroup.attr("transform", d3.event.transform);
         markerGroup.attr("transform", d3.event.transform);
         markerGroup.selectAll("circle")
-          .attr("r", d => sizeScale(d['co2emitted']) / d3.event.transform.k)
+          // .attr("r", d => sizeScale(d['co2emitted']) / d3.event.transform.k)
           .style("stroke-width", function (d) {
-            return 1 / d3.event.transform.k; // Adjust stroke width based on zoom scale
+            return 1.3 / d3.event.transform.k; // Adjust stroke width based on zoom scale
           });
+        // sizeScale.range([2 * d3.event.transform.k, 10 * d3.event.transform.k])
       });
 
     // Apply the initial zoom settings
