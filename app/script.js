@@ -100,7 +100,7 @@ async function loadData() {
 
       // Update map fill
       mapGroup.selectAll('path')
-        .transition().duration(500)
+        .transition().duration(700)
         .style('fill', d => (d.properties[currentDataProperty] === 0) ? '#ababab' : mapColorScale(d.properties[currentDataProperty]));
 
       // Dynamically generate legend title and labels
@@ -146,7 +146,7 @@ async function loadData() {
       .style('fill', d => typeColorScale(d))
       .on('click', function (legendType) {
         // Toggle visibility of the clicked legend type
-        var isTypeVisible = !typeVisibilityMap.get(legendType);
+        let isTypeVisible = !typeVisibilityMap.get(legendType);
         typeVisibilityMap.set(legendType, isTypeVisible);
 
         // Update markerGroup based on visibility map
@@ -158,7 +158,7 @@ async function loadData() {
         // Update legend circles opacity
         legendCircles.filter(d => d === legendType)
           .transition().duration(300)
-          .style('opacity', isTypeVisible ? 1 : 0.5);
+          .style('opacity', isTypeVisible ? 1 : 0.3);
       });
 
     typeLegendGroup.selectAll('.legend-text')
@@ -171,7 +171,7 @@ async function loadData() {
 
     const sizeScale = d3.scaleLinear()
       .domain(d3.extent(powerplantsData, d => d['co2emitted']))
-      .range([4, 13]);
+      .range([4, 20]);
 
     // Tooltip setup
     const tooltip = d3.select("body").append("div")
@@ -193,16 +193,17 @@ async function loadData() {
       .style("stroke", "blue")
       .style("stroke-width", 1)
       .on("mouseover", function (d) {
-        tooltip.transition()
-          .duration(200)
-          .style("opacity", .9);
-        tooltip.html(`${d['country']}<br>Name: ${d['name_p']}<br>`
-          + `Type: ${d['type_g']}<br>`
-          + `CO2 Emitted: ${d3.format(",.0f")(d['co2emitted'] / 1000)} t`
-          + `<br>Generation: ${d3.format(",.0f")(d['generation'] / 1000)} GWh`)
-          .style("left", (d3.event.pageX + 10) + "px")
-          .style("top", (d3.event.pageY - 20) + "px");
-
+        if (typeVisibilityMap.get(d['type_g'])) {
+          tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+          tooltip.html(`${d['country']}<br>Name: ${d['name_p']}<br>`
+            + `Type: ${d['type_g']}<br>`
+            + `CO2 Emitted: ${d3.format(",.0f")(d['co2emitted'] / 1000)} t`
+            + `<br>Generation: ${d3.format(",.0f")(d['generation'] / 1000)} GWh`)
+            .style("left", (d3.event.pageX + 10) + "px")
+            .style("top", (d3.event.pageY - 20) + "px");
+        }
       })
       .on("mouseout", function () {
         tooltip.transition()

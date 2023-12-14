@@ -4,20 +4,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>European Power Plants CO2 Emissions</title>
-  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <title>EU Power Plants CO2 Emissions Map</title>
   <link rel="icon" href="bolt-solid.svg" type="image/x-icon">
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <h1>European Power Plants CO2 Emissions</h1>
+  <h1>EU Power Plants CO2 Emissions Map</h1>
+  <!-- <button type="button" class="btn btn-primary">Base class</button> -->
   <div id="container">
     <div id="map-elements">
       <button id="switchButton">Switch</button>
     </div>
     <svg id="map"></svg>
-    <script src="script.js"> </script>
   </div>
   <div class="footer">
     <div id="info">The provided data covers 2018 EU CO2 Emissions</div>
@@ -30,9 +29,11 @@
         <br>
         <a href="https://ember-climate.org/data-catalogue/eu-power-plant-emissions-data/">EMBER EU Power Plant Emissions
           Data</a>
+        </div>
       </div>
     </div>
-  </div>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="script.js"> </script>
 </body>
 
 </html>
