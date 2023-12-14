@@ -112,7 +112,7 @@ async function loadData() {
       legendGroup.select('#em-legend-title')
         .text(titleText);
 
-      legendGroup.selectAll('#em-legend-text')
+      legendGroup.selectAll('.em-legend-text')
         .data(legendLabels)
         .text(d => d3.format(isEmissions ? ".0f" : ",.0f")(d) + (isEmissions ? " Mt" : " Kg"));
     }
