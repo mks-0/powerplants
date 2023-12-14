@@ -6,6 +6,7 @@ async function loadData() {
       d3.csv("Data/jrc_powerplants.csv")
     ]);
 
+    // Convert to numbers
     powerplantsData.forEach(d => {
       d.lat = +d.lat;
       d.lon = +d.lon;
@@ -50,10 +51,9 @@ async function loadData() {
       .style('fill', d => (d.properties.Emissions === 0) ? '#ababab' : mapColorScale(d.properties.Emissions))
       .style('stroke', 'white');
 
-    // Continuous Color Scale Legend
-    const legendGroup = d3.select('#map').append("g")
+    const legendGroup = d3.select('#map-elements').append("svg")
       .attr("class", "legend")
-      .attr("id", "em-legend")
+      .attr("id", "em-legend");
 
     const legendGradient = legendGroup.append('defs')
       .append('linearGradient')
@@ -72,16 +72,15 @@ async function loadData() {
     legendGroup.append('rect')
       .attr('width', 210)
       .attr('height', 25)
-      .style('fill', 'url(#em-legend-gradient)')
+      .style('fill', 'url(#em-legend-gradient)');
 
     const legendLabels = [mapColorScale.domain()[0], (mapColorScale.domain()[1] / 1e6)];
 
     legendGroup.selectAll('.em-legend-text')
       .data(legendLabels)
       .enter().append('text')
-      .attr('id', 'em-legend-text')
+      .attr('class', 'em-legend-text')
       .attr('x', (d, i) => (i == 0) ? 0 : 150)
- 
       .text(d => d3.format(".0f")(d) + " Mt");
 
     legendGroup.append('text')
@@ -101,6 +100,7 @@ async function loadData() {
 
       // Update map fill
       mapGroup.selectAll('path')
+        .transition().duration(500)
         .style('fill', d => (d.properties[currentDataProperty] === 0) ? '#ababab' : mapColorScale(d.properties[currentDataProperty]));
 
       // Dynamically generate legend title and labels
@@ -110,7 +110,7 @@ async function loadData() {
 
       // Update legend title and labels
       legendGroup.select('#em-legend-title')
-        .text(titleText)
+        .text(titleText);
 
       legendGroup.selectAll('#em-legend-text')
         .data(legendLabels)
@@ -118,7 +118,7 @@ async function loadData() {
     }
 
     // Add an event listener or UI element to trigger the switch
-    d3.select('#switchButton') // Change this selector based on your UI element
+    d3.select('#switchButton')
       .on('click', function () {
         // Toggle between 'Emissions' and 'em_per_capita'
         currentDataProperty = (currentDataProperty === 'Emissions') ? 'em_per_capita' : 'Emissions';
@@ -126,42 +126,63 @@ async function loadData() {
         switchEmissions();
       });
 
-    // Powerplants data processing
-    const sizeScale = d3.scaleLinear()
-      .domain(d3.extent(powerplantsData, d => d['co2emitted']))
-      .range([4, 13]);
-
     const typeColorScale = d3.scaleOrdinal(d3.schemeCategory10)
       .domain(powerplantsData.map(d => d['type_g']));
 
     // Add a group element for the type_g legend
-    const typeLegendGroup = d3.select('#map').append("g")
+    const typeLegendGroup = d3.select('#map-elements').append("svg")
       .attr("class", "legend")
-      .attr("id", "type-legend")
+      .attr("id", "type-legend");
 
-    typeLegendGroup.selectAll('.legend-circle')
+    const typeVisibilityMap = new Map(typeColorScale.domain().map(type => [type, true]));
+
+    const legendCircles = typeLegendGroup.selectAll('.legend-circle')
       .data(typeColorScale.domain())
       .enter().append('circle')
-      .attr('id', 'type-legend-circle')
+      .attr('class', 'type-legend-circle')
       .attr('cx', 10)
       .attr('cy', (d, i) => i * 30 + 10)
       .attr('r', 10)
-      .style('fill', d => typeColorScale(d));
+      .style('fill', d => typeColorScale(d))
+      .on('click', function (legendType) {
+        // Toggle visibility of the clicked legend type
+        var isTypeVisible = !typeVisibilityMap.get(legendType);
+        typeVisibilityMap.set(legendType, isTypeVisible);
+
+        // Update markerGroup based on visibility map
+        markerGroup.selectAll('circle')
+          .filter(d => d['type_g'] === legendType)
+          .transition().duration(500)
+          .style('opacity', isTypeVisible ? 1 : 0);
+
+        // Update legend circles opacity
+        legendCircles.filter(d => d === legendType)
+          .transition().duration(300)
+          .style('opacity', isTypeVisible ? 1 : 0.5);
+      });
 
     typeLegendGroup.selectAll('.legend-text')
       .data(typeColorScale.domain())
       .enter().append('text')
-      .attr('id', 'type-legend-text')
+      .attr('class', 'type-legend-text')
       .attr('y', (d, i) => i * 30 + 15)
       .attr('x', 25)
       .text(d => d);
+
+    const sizeScale = d3.scaleLinear()
+      .domain(d3.extent(powerplantsData, d => d['co2emitted']))
+      .range([4, 13]);
+
+    // Tooltip setup
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
 
     const markerGroup = svg.append("g");
 
     markerGroup.selectAll("circle")
       .data(powerplantsData)
-      .enter()
-      .append("circle")
+      .enter().append("circle")
       .attr("cx", d => projection([d.lon, d.lat])[0])
       .attr("cy", d => projection([d.lon, d.lat])[1])
       .attr("r", d => sizeScale(d['co2emitted']))
@@ -176,28 +197,30 @@ async function loadData() {
           .duration(200)
           .style("opacity", .9);
         tooltip.html(`${d['country']}<br>Name: ${d['name_p']}<br>`
+          + `Type: ${d['type_g']}<br>`
           + `CO2 Emitted: ${d3.format(",.0f")(d['co2emitted'] / 1000)} t`
           + `<br>Generation: ${d3.format(",.0f")(d['generation'] / 1000)} GWh`)
           .style("left", (d3.event.pageX + 10) + "px")
           .style("top", (d3.event.pageY - 20) + "px");
+
       })
       .on("mouseout", function () {
         tooltip.transition()
           .duration(500)
-          .style("opacity", 0);
+          .style("opacity", 0)
+          .attr('display', 'none');
       });
 
     const initialZoom = {
-      k: 1.7,  // Initial scale (adjust as needed)
-      x: -500,  // Initial x translation
-      y: -700   // Initial y translation
+      k: 1.7,  // scale
+      x: -500,
+      y: -700
     };
 
     let zoom = d3.zoom()
       .scaleExtent([1, 20])
       .on("zoom", function () {
         mapGroup.attr("transform", d3.event.transform);
-        // mapGroup.attr("scale", d3.event.);
         markerGroup.attr("transform", d3.event.transform);
         markerGroup.selectAll("circle")
           .attr("r", d => sizeScale(d['co2emitted']) / d3.event.transform.k)
@@ -218,11 +241,6 @@ async function loadData() {
     console.error("Error loading data:", error);
   }
 }
-
-// Tooltip setup
-const tooltip = d3.select("body").append("div")
-  .attr("class", "tooltip")
-  .style("opacity", 0);
 
 // Call the function to load and render the data
 loadData();
