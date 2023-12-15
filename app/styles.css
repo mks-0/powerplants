@@ -80,7 +80,7 @@ button {
   position: absolute;
   text-align: left;
   padding: 1vh;
-  font: 1.5vh sans-serif;
+  font-size: 1.6vh;
   background: lightsteelblue;
   border-radius: 0.1vh;
   pointer-events: none;
