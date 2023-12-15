@@ -180,16 +180,22 @@ async function loadData() {
 
     const markerGroup = svg.append("g");
 
-    markerGroup.selectAll("circle")
+    // Sort the data based on circle size in descending order
+    powerplantsData.sort((a, b) => sizeScale(b['co2emitted']) - sizeScale(a['co2emitted']));
+    
+    function shiftAlpha (d, alpha) {
+      const rgbColor = d3.color(typeColorScale(d['type_g'])).rgb();
+      return `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${alpha})`;
+    }
+
+    // Append the circles
+    const circles = markerGroup.selectAll("circle")
       .data(powerplantsData)
       .enter().append("circle")
       .attr("cx", d => projection([d.lon, d.lat])[0])
       .attr("cy", d => projection([d.lon, d.lat])[1])
       .attr("r", d => sizeScale(d['co2emitted']))
-      .style("fill", d => {
-        const rgbColor = d3.color(typeColorScale(d['type_g'])).rgb();
-        return `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)`;
-      })
+      .style("fill", d => shiftAlpha(d, 0.6))
       .style("stroke", "blue")
       .style("stroke-width", 1)
       .on("mouseover", function (d) {
@@ -204,12 +210,16 @@ async function loadData() {
             .style("left", (d3.event.pageX + 10) + "px")
             .style("top", (d3.event.pageY - 20) + "px");
         }
+        // Set the opacity of the selected circle to 1.0
+        d3.select(this).transition().style("fill", d => shiftAlpha(d, 1))
       })
       .on("mouseout", function () {
         tooltip.transition()
-          .duration(500)
+          .duration(150)
           .style("opacity", 0)
           .attr('display', 'none');
+        // Reset the opacity of all circles on mouseout
+        circles.transition().style("fill", d => shiftAlpha(d, 0.6))
       });
 
     const initialZoom = {
@@ -226,7 +236,7 @@ async function loadData() {
         markerGroup.selectAll("circle")
           // .attr("r", d => sizeScale(d['co2emitted']) / d3.event.transform.k)
           .style("stroke-width", function (d) {
-            return 1.3 / d3.event.transform.k; // Adjust stroke width based on zoom scale
+            return 1.5 / d3.event.transform.k; // Adjust stroke width based on zoom scale
           });
         // sizeScale.range([2 * d3.event.transform.k, 10 * d3.event.transform.k])
       });
