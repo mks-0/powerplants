@@ -38,7 +38,7 @@ async function loadData() {
 
     // Color scale for map
     const mapColorScale = d3.scaleSequential(d3.interpolateRgbBasis([
-      "#f5e267", "#f77d31", "#c72a12"
+      "#f5e267", "#ff7621", "#c72a12"
     ]))
       .domain(d3.extent(geojson.features, d => d.properties.Emissions));
 
@@ -126,8 +126,18 @@ async function loadData() {
         switchEmissions();
       });
 
-    const typeColorScale = d3.scaleOrdinal(d3.schemeCategory10)
-      .domain(powerplantsData.map(d => d['type_g']));
+    const typeColors = [
+      '#9C27B0',
+      '#00c2fc',
+      '#ff3d33',
+      '#ffa600',
+      '#3aba47',
+      '#705e5e'
+    ];
+
+    const typeColorScale = d3.scaleOrdinal()
+      .domain(powerplantsData.map(d => d['type_g']))
+      .range(typeColors);
 
     // Add a group element for the type_g legend
     const typeLegendGroup = d3.select('#map-elements').append("svg")
@@ -182,9 +192,9 @@ async function loadData() {
 
     // Sort the data based on circle size in descending order
     powerplantsData.sort((a, b) => sizeScale(b['co2emitted']) - sizeScale(a['co2emitted']));
-    
-    function shiftAlpha (d, alpha) {
-      const rgbColor = d3.color(typeColorScale(d['type_g'])).rgb();
+
+    function shiftAlpha(d, alpha) {
+      let rgbColor = d3.color(typeColorScale(d['type_g'])).rgb();
       return `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${alpha})`;
     }
 
@@ -196,7 +206,7 @@ async function loadData() {
       .attr("cy", d => projection([d.lon, d.lat])[1])
       .attr("r", d => sizeScale(d['co2emitted']))
       .style("fill", d => shiftAlpha(d, 0.6))
-      .style("stroke", "blue")
+      .style("stroke", "#67358c")
       .style("stroke-width", 1)
       .on("mouseover", function (d) {
         if (typeVisibilityMap.get(d['type_g'])) {
@@ -234,11 +244,9 @@ async function loadData() {
         mapGroup.attr("transform", d3.event.transform);
         markerGroup.attr("transform", d3.event.transform);
         markerGroup.selectAll("circle")
-          // .attr("r", d => sizeScale(d['co2emitted']) / d3.event.transform.k)
           .style("stroke-width", function (d) {
-            return 1.5 / d3.event.transform.k; // Adjust stroke width based on zoom scale
+            return 1.2 / d3.event.transform.k; // Adjust stroke width based on zoom scale
           });
-        // sizeScale.range([2 * d3.event.transform.k, 10 * d3.event.transform.k])
       });
 
     // Apply the initial zoom settings
