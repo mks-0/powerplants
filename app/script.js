@@ -162,8 +162,13 @@ async function loadData() {
         // Update markerGroup based on visibility map
         markerGroup.selectAll('circle')
           .filter(d => d['type_g'] === legendType)
+          .style('visibility', 'visible')  // Set visibility to 'visible' regardless of current state
           .transition().duration(500)
-          .style('opacity', isTypeVisible ? 1 : 0);
+          .style('opacity', isTypeVisible ? 1 : 0)  // Transition opacity to final state
+          .on('end', function () {
+            // Set visibility to 'hidden' only after the transition is complete
+            d3.select(this).style('visibility', isTypeVisible ? 'visible' : 'hidden');
+          });
 
         // Update legend circles opacity
         legendCircles.filter(d => d === legendType)
