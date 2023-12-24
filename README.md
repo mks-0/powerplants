@@ -1,8 +1,8 @@
 # EU Power Plants Exploratory Data Analysis
-This project is an Exploration of EU-27 Power Plants. The repository consists of the EDA itself, Uploading Data into PostreSQL Database and an [interactive map](https://main.dp23i3r580zal.amplifyapp.com/) of the power plants.
+This project is an Exploration of EU-27 Power Plants. The repository consists of the EDA, PostreSQL Database creation and an [interactive map](https://main.dp23i3r580zal.amplifyapp.com/) of the power plants.
 
 ## Overview
-The purpose of this project is to analyze EU-27 Power Plants, examining their generation types, emissions, power, capacity, and efficiency, and comparing them at the national level.
+The purpose of this project is to analyze EU-27 Power Plants, examining their source types, emissions, power, capacity, and efficiency.
 
 ### Technologies Used
 + Python 3.11.6 (pandas, numpy, matplotlib, seaborn, psycopg, sqlalchemy)
