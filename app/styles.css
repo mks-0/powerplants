@@ -199,8 +199,6 @@ button {
   }
 
   #github {
-    /* display: block;
-    height: auto; */
     text-align: center;
     margin-top: 10px;
     order: 2;
@@ -229,6 +227,7 @@ button {
   #sources {
     align-content: center;
     margin: auto;
+    order: 1;
   }
 
   #info {
@@ -270,9 +269,5 @@ button {
 
         position: absolute;
 
-    }
-
-    #github {
-      margin-top: 40px;
     }
 }}
