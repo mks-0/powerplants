@@ -273,9 +273,9 @@ button {
 
     }
 
-    .footer {
+    #github {
 
-      display: -webkit-grid;
-      
+      transform: translate(0, -50px);
+
     }
 }}
