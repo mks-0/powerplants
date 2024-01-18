@@ -97,7 +97,6 @@ button {
   grid-template-columns: repeat(2, 1fr);
   margin: 10px 13%;
   padding: 2px 1vh;
-  /* justify-content: flex-start; */
   font-size: 1.7vh;
   color: #d6d6d6;
 }
@@ -208,7 +207,6 @@ button {
   #github a{
     margin: 0 auto ;
     position: relative;
-    bottom: 130%;
   }
 
   .footer {
@@ -270,12 +268,6 @@ button {
     #em-legend { 
 
         position: absolute;
-
-    }
-
-    #github {
-
-      transform: translate(0, -50px);
 
     }
 }}
