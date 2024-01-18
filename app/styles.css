@@ -199,8 +199,8 @@ button {
   }
 
   #github {
-    display: block;
-    height: auto;
+    /* display: block;
+    height: auto; */
     text-align: center;
     margin-top: 10px;
     order: 2;
@@ -270,5 +270,9 @@ button {
 
         position: absolute;
 
+    }
+
+    #github {
+      margin-top: 40px;
     }
 }}
