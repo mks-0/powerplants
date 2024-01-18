@@ -213,9 +213,9 @@ button {
 
   .footer {
     margin: 15px auto 10px auto;
-    grid-template-columns: repeat(1, 3fr);
+    grid-template-columns: 1fr;
     grid-auto-flow: row;
-    flex-direction: column;
+    /* flex-direction: column; */
     font-size: 1.4vh;
     align-items: center;
   }
