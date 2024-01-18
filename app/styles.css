@@ -213,12 +213,11 @@ button {
 
   .footer {
     margin: 15px auto 10px auto;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(1, 3fr);
     grid-auto-flow: row;
     flex-direction: column;
     font-size: 1.4vh;
     align-items: center;
-    justify-content: space-evenly;
   }
 
   #github svg {
