@@ -41,14 +41,6 @@ a:visited svg path {
   color: rgb(125, 91, 156);
 }
 
-a:hover {
-  color: hotpink;
-}
-
-a:hover svg path{
-  fill: hotpink;
-}
-
 button:active {
   background-color: #c72a12;
 }
@@ -259,6 +251,14 @@ button {
 
   button:hover:active {
     background-color: #c72a12;
+  }
+
+  a:hover {
+    color: hotpink;
+  }
+  
+  a:hover svg path{
+    fill: hotpink;
   }
 }
 
